@@ -38,6 +38,7 @@ Provided in `simulator.py` is the `Simulator` class, which has:
 - the car outline vertices (`.car_vertices`)
 - `.get_results` to see how the simulation went
 - `.run()` to run the simulation.
+- a bunch of other things.
 
 You can also get the centerline of the track, parameterized by distance (in meters), using the `centerline` function:
 ```
@@ -54,6 +55,8 @@ Help on vectorize in module numpy:
         array: shape (2,) if `x` is a float or (N, 2) if `x` is an array-like of length N.
 >>> 
 ```
+
+In general, feel free to use any provided functions/properties that don't start with an underscore.
 
 In order to run this simulation, you'll need to install `casadi`, `matplotlib`, and `numpy`.
 All can be installed with `pip` (ie, `pip install casadi matplotlib numpy`)
