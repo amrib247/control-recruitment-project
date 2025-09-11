@@ -21,7 +21,7 @@ There are also the following constraints:
 | -------------- | ----------- | ----------- |
 | $\theta$       | -0.7        | 0.7         |
 | $\dot{\theta}$ | -1.0        | 1.0         |
-| $a$            | -4          | 10          |
+| $a$            | 10          | -4          |
 
 The only other important numbers that you do not get to choose are:
 - the wheelbase (distance between front and rear wheels) is 1.58 meters.
