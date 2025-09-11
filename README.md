@@ -60,7 +60,18 @@ All can be installed with `pip` (ie, `pip install casadi matplotlib numpy`)
 
 We recommend you fork this repo and develop your code there (so you can keep history with git/github), but you do not need to. You can just clone this repo or download the .zip file and work locally.
 
-If you don't want to run anything locally (if you don't have python, or there's something funny with your default C compiler, or any other reason), this code works in google colab. Just make a new notebook and add the following as the first cell:
+### Other Options
+If you don't want to run anything locally (if you don't have python, or there's something funny with your default C compiler, or any other reason), this code works in google colab and on the OCF
+
+#### OCF
+
+You can use the vscode remote ssh plugin to use vscode on the OCF's ssh server. Make an account and connect.
+You can then clone the repo and work as normal. You may have to `pip install --upgrade matplotlib casadi`.
+Viewing the animation likely won't work but you can save it to a file with `sim.animate(save=True)` and view that.
+
+#### Colab
+
+Just make a new notebook and add the following as the first cell:
 
 ```
 !pip install casadi
@@ -88,6 +99,7 @@ sim.plot()
 ```
 
 I'm not sure if `sim.animate()` will work in colab, but if it doesn't, you can just pass `sim.animate(save=True)` and look at the resulting gif.
+
 
 
 ## Presentation & Submission
