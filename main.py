@@ -4,8 +4,6 @@ from simulator import Simulator, centerline
 
 sim = Simulator()
 
-#distance = 0.0
-
 # Load in centerline as an array of points
 num_points = 1000
 track_length = 104.9
@@ -13,7 +11,9 @@ centerline_points = np.full((num_points, 2), np.array([0., 0.]))
 for i in range(num_points):
     centerline_points[i] = centerline(track_length * i / num_points)
 
-previous_angle = 0.0
+#Initialize other Global variables
+previous_angle = 0.0 
+time = 0.0 # Time elapsed
 
 
 def controller(x):
@@ -25,56 +25,45 @@ def controller(x):
     Returns:
         ndarray: numpy array of shape (2,) containing [fwd acceleration, steering rate]
     """
-    """
-    turn_scale = 1
-    distance_from_cone = 2.5
-    # Gets nearest 2 cones to the right of the middle of the vehicle
-    cones = get_closest_cones(x, 2, cond = lambda cone: cone[1] - x[1] < math.tan(x[2]) * (cone[0] - x[0])) 
-    point = np.array([cones[0][0] - cones[1][0], cones[0][1] - cones[1][1]]) # Midpoint of 2 cones
-    #print(cones)
-    angle_to_cone = math.atan((point[0] - x[0])/(point[1] - x[1]))
-    angle_from_cone = angle_to_cone - math.pi/2
-    point += np.array([math.cos(angle_from_cone), math.sin(angle_from_cone)]) * distance_from_cone
-    angle_to_point = math.atan((point[0] - x[0])/(point[1] - x[1]))
-    return np.array([11.99, math.tanh((x[2] - angle_to_point) * -turn_scale)])"""
-
+    #Setup
     global centerline_points
     global previous_angle
-    lead = 60
+    global time
+    lead = 67
 
+    #Time Optimization
+    if x[0] < 0.2 and x[0] > -0.2 and x[1] > -1.5 and x[1] < 1.5 and time > 3:
+        print('Time:', time)
 
+    #Get Leading Centerline Point and Angle
     closest = closest_centerline_point(x)
     centerline_point = centerline_points[(closest + lead) % num_points]
     angle_to_centerline = math.atan((centerline_point[1] - x[1]) / (centerline_point[0] - x[0]))
     if centerline_point[0] - x[0] < 0:
         angle_to_centerline += math.pi
 
+    #Calculate Proportional Response Term
     proportional_term = ((x[2] + x[4]) - angle_to_centerline) % (2 * math.pi)
     if proportional_term > math.pi:
         proportional_term -= 2 * math.pi
-    proportional_term *= -0.5
+    proportional_term *= -1.6
 
-
+    #Calculate Derivative Response Term
     derivative_steering_angle = previous_angle - ((x[2] + x[4]) % (2 * math.pi))
     derivative_term = (previous_angle - ((x[2] + x[4]) - angle_to_centerline))  % (2 * math.pi) 
     if derivative_term > math.pi:
         derivative_term -= 2 * math.pi
-    derivative_term *= 50.0
+    derivative_term *= 33.0
 
-    #print("P:", proportional_term)
-    #print('D', derivative_term)
-
+    #Calculate Final Commands
     turn_scale = 3
     turn_max = 1    
+    velocity_max_scale = 0.0
 
     turn_command = math.tanh(((proportional_term + derivative_term)) * turn_scale) * turn_max
     previous_angle = ((x[2] + x[4]) - angle_to_centerline) % (2 * math.pi)
+    time += 0.01
 
-    #print('Angle to centerline:', angle_to_centerline)
-    #print('Heading:', x[2])
-    #print('Command', turn_command)
-    
-    velocity_max_scale = 0.0
     return np.array([(12 - velocity_max_scale * x[3]) - 0.1 * abs(derivative_steering_angle), turn_command])
 
 def closest_centerline_point(x):
@@ -121,6 +110,6 @@ def get_closest_cones(x, k, cond = lambda cone: True):
     return closest
     
 sim.set_controller(controller)
-sim.run(15)
+sim.run(45)
 sim.animate()
 sim.plot()
