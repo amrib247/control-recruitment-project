@@ -29,7 +29,8 @@ def controller(x):
     global centerline_points
     global previous_angle
     global time
-    lead = 67
+
+    lead = 60 + int(29.805 * ( 1 / 3.27 + previous_angle))
 
     #Time Optimization
     if x[0] < 0.2 and x[0] > -0.2 and x[1] > -1.5 and x[1] < 1.5 and time > 3:
@@ -46,22 +47,24 @@ def controller(x):
     proportional_term = ((x[2] + x[4]) - angle_to_centerline) % (2 * math.pi)
     if proportional_term > math.pi:
         proportional_term -= 2 * math.pi
-    proportional_term *= -1.6
+    proportional_term *= -(1.4 + x[3] / 46.31)
 
     #Calculate Derivative Response Term
     derivative_steering_angle = previous_angle - ((x[2] + x[4]) % (2 * math.pi))
     derivative_term = (previous_angle - ((x[2] + x[4]) - angle_to_centerline))  % (2 * math.pi) 
     if derivative_term > math.pi:
-        derivative_term -= 2 * math.pi
-    derivative_term *= 33.0
-
-    #Calculate Final Commands
+        derivative_term -=  2 * math.pi
+    derivative_term *= 32.0
+    #Calculate Final Commands and Update Global Variables
     turn_scale = 3
     turn_max = 1    
     velocity_max_scale = 0.0
 
     turn_command = math.tanh(((proportional_term + derivative_term)) * turn_scale) * turn_max
+    
     previous_angle = ((x[2] + x[4]) - angle_to_centerline) % (2 * math.pi)
+    if previous_angle > math.pi:
+        previous_angle -= 2 * math.pi
     time += 0.01
 
     return np.array([(12 - velocity_max_scale * x[3]) - 0.1 * abs(derivative_steering_angle), turn_command])
