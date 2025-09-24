@@ -30,7 +30,7 @@ def controller(x):
     global previous_angle
     global time
 
-    lead = 60 + int(29.805 * ( 1 / 3.27 + previous_angle))
+    lead = 60 + int(5 * ( 1 / 1 + previous_angle))
 
     #Time Optimization
     if x[0] < 0.2 and x[0] > -0.2 and x[1] > -1.5 and x[1] < 1.5 and time > 3:
@@ -50,11 +50,11 @@ def controller(x):
     proportional_term *= -(1.4 + x[3] / 46.31)
 
     #Calculate Derivative Response Term
-    derivative_steering_angle = previous_angle - ((x[2] + x[4]) % (2 * math.pi))
     derivative_term = (previous_angle - ((x[2] + x[4]) - angle_to_centerline))  % (2 * math.pi) 
     if derivative_term > math.pi:
         derivative_term -=  2 * math.pi
     derivative_term *= 32.0
+
     #Calculate Final Commands and Update Global Variables
     turn_scale = 3
     turn_max = 1    
@@ -67,7 +67,19 @@ def controller(x):
         previous_angle -= 2 * math.pi
     time += 0.01
 
-    return np.array([(12 - velocity_max_scale * x[3]) - 0.1 * abs(derivative_steering_angle), turn_command])
+    max_accel = 12
+    buffer = 0
+    curve_point = centerline_points[(closest + 85) % num_points]
+    curve_angle = math.atan((curve_point[1] - x[1]) / (curve_point[0] - x[0]))
+    if curve_point[0] - x[0] < 0:
+        curve_angle += math.pi
+    diff = (x[2] - curve_angle) % (2 * math.pi)
+    if diff > math.pi:
+        diff -= 2 * math.pi
+    max_velocity_centripetal = math.sqrt(abs((max_accel - buffer) * (1.58 / max(0.1, math.sin(diff)))))
+    
+
+    return np.array([10 - 10 * (x[3] / max_velocity_centripetal), turn_command])
 
 def closest_centerline_point(x):
     """Returns the index of the closest point along the centerline"""
