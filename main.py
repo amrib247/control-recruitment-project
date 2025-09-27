@@ -67,10 +67,10 @@ def controller(x):
         previous_angle -= 2 * math.pi
     time += 0.01
 
+    #Acceleration Control
     max_accel = 12
     buffer = 0
     curve_lead = 50 + int(x[3]**2 / 2.9)
-    # Best: 50 + ... /2.9
     
     curve_point = centerline_points[(closest + curve_lead) % num_points]
     curve_angle = math.atan((curve_point[1] - x[1]) / (curve_point[0] - x[0]))
@@ -80,9 +80,9 @@ def controller(x):
     if diff > math.pi:
         diff -= 2 * math.pi
     max_velocity_centripetal = math.sqrt(abs((max_accel - buffer) * (1.58 / max(0.0000001, math.sin(diff)))))
-    
-
+   
     return np.array([10 - 10 * (x[3] / max_velocity_centripetal), turn_command])
+
 
 def closest_centerline_point(x):
     """Returns the index of the closest point along the centerline"""
@@ -128,6 +128,6 @@ def get_closest_cones(x, k, cond = lambda cone: True):
     return closest
     
 sim.set_controller(controller)
-sim.run(60)
+sim.run(90)
 sim.animate()
 sim.plot()
